@@ -1,44 +1,38 @@
-from flask import Flask, render_template, request, redirect
-from models import db, Post
-from datetime import datetime
 import os
+from flask import Flask, render_template, request, redirect
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/bbs.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-db.init_app(app)
+# SQLite データベースの絶対パスを設定（Render対応）
+basedir = os.path.abspath(os.path.dirname(__file__))
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(basedir, "instance", "bbs.db")
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-with app.app_context():
-    db.create_all()
+db = SQLAlchemy(app)
 
-@app.route('/', methods=['GET', 'POST'])
+# モデル定義（例）
+class Post(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.Text, nullable=False)
+
+# ルート表示
+@app.route("/")
 def index():
-    if request.method == 'POST':
-        name = request.form['name']
-        content = request.form['content']
-        if name and content:
-            post = Post(
-                name=name,
-                content=content,
-                timestamp=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            )
-            db.session.add(post)
-            db.session.commit()
-        return redirect('/')
-    posts = Post.query.order_by(Post.id.desc()).all()
-    return render_template('index.html', posts=posts)
+    posts = Post.query.all()
+    return render_template("index.html", posts=posts)
 
-@app.route('/delete/<int:post_id>', methods=['POST'])
-def delete(post_id):
-    post = db.session.get(Post, post_id)  # SQLAlchemy 2.0対応
-    if post:
-        db.session.delete(post)
+# 投稿処理
+@app.route("/add", methods=["POST"])
+def add():
+    content = request.form.get("content")
+    if content:
+        new_post = Post(content=content)
+        db.session.add(new_post)
         db.session.commit()
-    return redirect('/')
+    return redirect("/")
 
-# 🔸 app.run() は削除。Render では gunicorn が起動するため不要
-
+# Render 用ポートバインド
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
