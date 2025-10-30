@@ -37,3 +37,7 @@ def delete(post_id):
     return redirect('/')
 
 # 🔸 app.run() は削除。Render では gunicorn が起動するため不要
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
