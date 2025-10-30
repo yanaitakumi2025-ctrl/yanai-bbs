@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect
 from models import db, Post
 from datetime import datetime
+import os
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/bbs.db'
