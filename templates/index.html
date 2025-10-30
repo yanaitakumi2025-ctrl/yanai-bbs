@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>矢内掲示板</title>
+</head>
+<body>
+    <h1>矢内掲示板</h1>
+
+    <form method="POST">
+        名前: <input type="text" name="name"><br>
+        内容: <textarea name="content"></textarea><br>
+        <button type="submit">投稿</button>
+    </form>
+
+    <hr>
+
+    {% for post in posts %}
+        <p><strong>{{ post.name }}</strong>（{{ post.timestamp }}）</p>
+        <p>{{ post.content }}</p>
+        <form method="POST" action="/delete/{{ post.id }}" style="display:inline;">
+            <button type="submit">削除</button>
+        </form>
+        <hr>
+    {% endfor %}
+</body>
+</html>
