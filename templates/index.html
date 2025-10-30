@@ -7,7 +7,8 @@
 <body>
     <h1>矢内掲示板</h1>
 
-    <form method="POST">
+    <!-- 投稿フォーム -->
+    <form method="POST" action="/add">
         名前: <input type="text" name="name"><br>
         内容: <textarea name="content"></textarea><br>
         <button type="submit">投稿</button>
@@ -15,6 +16,7 @@
 
     <hr>
 
+    <!-- 投稿一覧 -->
     {% for post in posts %}
         <p><strong>{{ post.name }}</strong>（{{ post.timestamp }}）</p>
         <p>{{ post.content }}</p>
