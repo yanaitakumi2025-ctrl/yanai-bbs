@@ -3,12 +3,11 @@ from models import db, Post
 from datetime import datetime
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bbs.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/bbs.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
 
-# Flask 3.x では app_context で DB 初期化
 with app.app_context():
     db.create_all()
 
@@ -31,11 +30,10 @@ def index():
 
 @app.route('/delete/<int:post_id>', methods=['POST'])
 def delete(post_id):
-    post = Post.query.get(post_id)
+    post = db.session.get(Post, post_id)  # SQLAlchemy 2.0対応
     if post:
         db.session.delete(post)
         db.session.commit()
     return redirect('/')
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# 🔸 app.run() は削除。Render では gunicorn が起動するため不要
