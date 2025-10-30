@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 
@@ -14,7 +15,9 @@ db = SQLAlchemy(app)
 # 投稿モデル
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100))
     content = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 # アプリ読み込み時にテーブル作成（Render対応）
 with app.app_context():
@@ -23,15 +26,16 @@ with app.app_context():
 # トップページ
 @app.route("/")
 def index():
-    posts = Post.query.all()
+    posts = Post.query.order_by(Post.timestamp.desc()).all()
     return render_template("index.html", posts=posts)
 
 # 投稿処理
 @app.route("/add", methods=["POST"])
 def add():
+    name = request.form.get("name")
     content = request.form.get("content")
     if content:
-        new_post = Post(content=content)
+        new_post = Post(name=name, content=content)
         db.session.add(new_post)
         db.session.commit()
     return redirect("/")
