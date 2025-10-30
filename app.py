@@ -4,19 +4,19 @@ from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
-# SQLite データベースの絶対パスを設定（Render対応）
+# SQLite データベースの絶対パス（Render対応）
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(basedir, "instance", "bbs.db")
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(basedir, "bbs.db")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 
-# モデル定義（例）
+# 投稿モデル
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text, nullable=False)
 
-# ルート表示
+# トップページ
 @app.route("/")
 def index():
     posts = Post.query.all()
