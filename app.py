@@ -16,7 +16,6 @@ db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-# モデル定義
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
@@ -82,7 +81,6 @@ def register():
         return redirect("/")
     return render_template("register.html")
 
-# DB作成は import 時に実行されないようにする
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
