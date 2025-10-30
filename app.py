@@ -1,4 +1,5 @@
 import os
+from datetime import datetime  # ← 先頭で追加
 from datetime import datetime
 from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
@@ -29,7 +30,13 @@ def index():
     posts = Post.query.order_by(Post.timestamp.desc()).all()
     return render_template("index.html", posts=posts)
 
-# 投稿処理
+class Post(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100))  # ← 名前欄
+    content = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)  # ← 投稿時間
+
+
 @app.route("/add", methods=["POST"])
 def add():
     name = request.form.get("name")
