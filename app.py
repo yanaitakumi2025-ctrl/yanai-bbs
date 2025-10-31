@@ -4,7 +4,7 @@ from datetime import datetime
 from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
-from flask_migrate import Migrate
+from flask_migrate import Migrate, upgrade
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
@@ -32,7 +32,7 @@ class User(db.Model, UserMixin):
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text, nullable=False)
-    image_path = db.Column(db.String(200))  # ← 画像パスを追加
+    image_path = db.Column(db.String(200))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     user = db.relationship("User")
@@ -99,8 +99,6 @@ def register():
         login_user(new_user)
         return redirect("/")
     return render_template("register.html")
-
-from flask_migrate import upgrade
 
 if __name__ == "__main__":
     with app.app_context():
