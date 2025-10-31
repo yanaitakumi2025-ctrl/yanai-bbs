@@ -1,9 +1,11 @@
 import os
+import uuid
 from datetime import datetime
 from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"
@@ -17,6 +19,9 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
+UPLOAD_FOLDER = os.path.join("static", "uploads")
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
@@ -25,6 +30,7 @@ class User(db.Model, UserMixin):
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text, nullable=False)
+    image_path = db.Column(db.String(200))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     user = db.relationship("User")
@@ -42,8 +48,18 @@ def index():
 @login_required
 def add():
     content = request.form.get("content")
+    image = request.files.get("image")
+    image_path = None
+
+    if image and image.filename != "":
+        filename = secure_filename(image.filename)
+        unique_name = str(uuid.uuid4()) + "_" + filename
+        save_path = os.path.join(UPLOAD_FOLDER, unique_name)
+        image.save(save_path)
+        image_path = os.path.join("uploads", unique_name)
+
     if content:
-        new_post = Post(content=content, user=current_user)
+        new_post = Post(content=content, image_path=image_path, user=current_user)
         db.session.add(new_post)
         db.session.commit()
     return redirect("/")

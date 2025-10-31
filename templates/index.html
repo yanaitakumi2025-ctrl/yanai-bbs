@@ -1,31 +1,25 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>矢内掲示板</title>
-</head>
-<body>
-  <h1>矢内掲示板</h1>
+<h2>掲示板</h2>
 
-  {% if current_user.is_authenticated %}
-    <p>ログイン中：{{ current_user.username }}</p>
-    <form action="/add" method="post">
-      <textarea name="content" required></textarea>
-      <button type="submit">投稿</button>
-    </form>
-    <p><a href="/logout">ログアウト</a></p>
-  {% else %}
-    <p><a href="/login">ログイン</a>すると投稿できます。</p>
-  {% endif %}
+{% if current_user.is_authenticated %}
+  <form method="post" action="/add" enctype="multipart/form-data">
+    <textarea name="content" placeholder="投稿内容" required></textarea><br>
+    <input type="file" name="image"><br>
+    <button type="submit">投稿</button>
+  </form>
+  <p><a href="/logout">ログアウト</a></p>
+{% else %}
+  <p><a href="/login">ログイン</a> または <a href="/register">新規登録</a>してください</p>
+{% endif %}
 
+<hr>
+
+{% for post in posts %}
+  <div>
+    <p>{{ post.content }}</p>
+    {% if post.image_path %}
+      <img src="{{ url_for('static', filename=post.image_path) }}" width="300">
+    {% endif %}
+    <p>投稿者: {{ post.user.username }} / {{ post.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
+  </div>
   <hr>
-
-  {% for post in posts %}
-    <div>
-      <p>{{ post.content }}</p>
-      <small>{{ post.user.username }} | {{ post.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</small>
-    </div>
-    <hr>
-  {% endfor %}
-</body>
-</html>
+{% endfor %}
